@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 
 async function imagePresignedUrl(data: { url: string; file: Blob }) {
   const res = await fetch(data.url, {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
