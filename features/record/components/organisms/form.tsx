@@ -11,7 +11,12 @@ import { TextField } from '@/components/molecules';
 import { css, cx } from '@/styled-system/css';
 import { flex } from '@/styled-system/patterns';
 
-import { useImagePresignedUrl, useMemory } from '../../apis';
+import {
+  useGetImagePresignedUrl,
+  useImagePresignedUrl,
+  useImageStatus,
+  useMemory,
+} from '../../apis';
 import { RecordRequestProps } from '../../apis/dto';
 import {
   isDistancePageModalOpen,
@@ -49,8 +54,10 @@ export function Form() {
     isLaneLengthBottomSheetOpen,
   );
 
-  const { mutateAsync: imagePresign } = useImagePresignedUrl();
+  const { mutateAsync: getImagePresign } = useGetImagePresignedUrl();
   const { mutateAsync: memory } = useMemory();
+  const { mutateAsync: imagePresign } = useImagePresignedUrl();
+  const { mutateAsync: imageStatus } = useImageStatus();
 
   const setIsPoolSearchPageModalOpen = useSetAtom(isPoolSearchPageModalOpen);
   const setIsDistancePageModalOpen = useSetAtom(isDistancePageModalOpen);
@@ -63,17 +70,31 @@ export function Form() {
 
   const isRecordAbled = startTime && endTime;
 
+  const getBlobData = (file: File) => {
+    const blobData = new Blob([file], { type: 'image/jpeg' });
+    return blobData;
+  };
+
   const onSubmit: SubmitHandler<RecordRequestProps> = async (data) => {
     if (formSubInfo.imageFiles.length > 0) {
-      await imagePresign(formSubInfo.imageFiles).then(async (res) => {
-        await memory({ ...data, imageIdList: [res.data[0].imageId] }).then(
-          (res) => {
-            router.push(
-              `/record/success?rank=${res.data.rank}&memoryId=${res.data.memoryId}&month=${res.data.month}`,
+      await getImagePresign([formSubInfo.imageFiles[0].name]).then(
+        async (getImagePresignRes) => {
+          await imagePresign({
+            url: getImagePresignRes.data[0].presignedUrl,
+            file: getBlobData(formSubInfo.imageFiles[0].fileData),
+          }).then(async () => {
+            await imageStatus([getImagePresignRes.data[0].imageId]).then(
+              async () => {
+                await memory(data).then((res) =>
+                  router.push(
+                    `/record/success?rank=${res.data.rank}&memoryId=${res.data.memoryId}&month=${res.data.month}`,
+                  ),
+                );
+              },
             );
-          },
-        );
-      });
+          });
+        },
+      );
     } else {
       await memory(data).then((res) =>
         router.push(

@@ -33,7 +33,7 @@ export function PhotoSection({ title }: FormSectionProps) {
           const resizedImage = await resizeFile(targetFile, 600, 600, 100);
           setFormSubInfo((prev) => ({
             ...prev,
-            imageFiles: [targetFile.name],
+            imageFiles: [{ fileData: resizedImage, name: targetFile.name }],
           }));
           const reader = new FileReader();
           reader.onload = () => {

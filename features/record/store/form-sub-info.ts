@@ -3,7 +3,7 @@ import { atom } from 'jotai';
 interface FormSubInfoProps {
   poolName?: string;
   totalDistance?: number;
-  imageFiles: string[];
+  imageFiles: { fileData: File; name: string }[];
 }
 
 const initialState = {
