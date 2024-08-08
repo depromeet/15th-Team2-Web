@@ -1,7 +1,5 @@
 'use client';
 
-import '../../styles/time-picker.css';
-
 import { ConfigProvider, TimePicker } from 'antd';
 import dayjs from 'dayjs';
 import { useAtom } from 'jotai';
@@ -9,21 +7,24 @@ import { useFormContext } from 'react-hook-form';
 
 import { Button } from '@/components/atoms';
 import { BottomSheet } from '@/components/molecules';
-import { css, cx } from '@/styled-system/css';
+import { css } from '@/styled-system/css';
 import { flex } from '@/styled-system/patterns';
 
-import useGetBrowserWidth from '../../hooks/use-get-browser-width';
+import { useTimeBottomSheet } from '../../hooks';
 import { timeBottomSheetState } from '../../store';
 
 export function TimeBottomSheet() {
   const { setValue } = useFormContext();
   const [timeBottmSheetState, setTimeBottmSheetState] =
     useAtom(timeBottomSheetState);
-  const width = useGetBrowserWidth();
+  const { width, showTimePicker } = useTimeBottomSheet(
+    timeBottmSheetState.isOpen,
+  );
 
   const handleTimeChange = (date: dayjs.Dayjs) => {
     setTimeBottmSheetState((prev) => ({ ...prev, time: date.format('HH:mm') }));
   };
+
   const handleDoneButtonClick = () => {
     if (timeBottmSheetState.variant === 'start')
       setValue('startTime', timeBottmSheetState.time);
@@ -58,24 +59,21 @@ export function TimeBottomSheet() {
           },
         }}
       >
-        <div className={layout.bottomSheet}>
+        <div className={layoutStyles.bottomSheet}>
           <TimePicker
             placeholder="시간 설정"
             format="HH:mm"
             use12Hours
-            suffixIcon={<span></span>}
-            panelRender={(originPanel) => (
-              <div
-                className={css({
-                  position: 'fixed',
-                  bottom: '82px',
-                  textStyle: 'heading3',
-                  fontWeight: 400,
-                })}
-              >
-                {originPanel}
-              </div>
-            )}
+            suffixIcon={null}
+            popupClassName={css({
+              opacity: showTimePicker ? 1 : 0,
+              transition: 'opacity 0.3s ease-in-out',
+            })}
+            panelRender={(originPanel) =>
+              showTimePicker ? (
+                <div className={panelStyles}>{originPanel}</div>
+              ) : null
+            }
             open={timeBottmSheetState.isOpen}
             showNow={false}
             inputMode="none"
@@ -85,11 +83,14 @@ export function TimeBottomSheet() {
             inputReadOnly
             onPickerValueChange={handleTimeChange}
             variant="borderless"
-            className={cx(css({ width: '100%' }), 'custom-picker')}
+            className={css({
+              width: '100%',
+              '& input': { visibility: 'hidden' },
+            })}
           />
         </div>
       </ConfigProvider>
-      <div className={layout.button}>
+      <div className={layoutStyles.button}>
         <Button
           size="large"
           label="완료"
@@ -102,9 +103,8 @@ export function TimeBottomSheet() {
   );
 }
 
-const layout = {
+const layoutStyles = {
   bottomSheet: flex({
-    position: 'relative',
     direction: 'column',
     alignItems: 'center',
     width: '100%',
@@ -119,3 +119,11 @@ const layout = {
     padding: '0 20px',
   }),
 };
+
+const panelStyles = css({
+  position: 'fixed',
+  bottom: '82px',
+  left: 0,
+  textStyle: 'heading3',
+  fontWeight: 400,
+});
