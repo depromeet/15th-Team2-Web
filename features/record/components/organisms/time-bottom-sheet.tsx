@@ -1,7 +1,5 @@
 'use client';
 
-import '../../styles/time-picker.css';
-
 import { ConfigProvider, TimePicker } from 'antd';
 import dayjs from 'dayjs';
 import { useAtom } from 'jotai';
@@ -9,7 +7,7 @@ import { useFormContext } from 'react-hook-form';
 
 import { Button } from '@/components/atoms';
 import { BottomSheet } from '@/components/molecules';
-import { css, cx } from '@/styled-system/css';
+import { css } from '@/styled-system/css';
 import { flex } from '@/styled-system/patterns';
 
 import useGetBrowserWidth from '../../hooks/use-get-browser-width';
@@ -53,9 +51,9 @@ export function TimeBottomSheet() {
               timeColumnHeight: 116,
             },
           },
-          token: {
-            motion: false,
-          },
+          // token: {
+          //   motion: false,
+          // },
         }}
       >
         <div className={layout.bottomSheet}>
@@ -63,7 +61,7 @@ export function TimeBottomSheet() {
             placeholder="시간 설정"
             format="HH:mm"
             use12Hours
-            suffixIcon={<span></span>}
+            suffixIcon={null}
             panelRender={(originPanel) => (
               <div
                 className={css({
@@ -85,7 +83,10 @@ export function TimeBottomSheet() {
             inputReadOnly
             onPickerValueChange={handleTimeChange}
             variant="borderless"
-            className={cx(css({ width: '100%' }), 'custom-picker')}
+            className={css({
+              width: '100%',
+              '& input': { visibility: 'hidden' },
+            })}
           />
         </div>
       </ConfigProvider>
