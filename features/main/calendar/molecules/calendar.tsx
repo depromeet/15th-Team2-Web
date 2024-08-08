@@ -13,7 +13,7 @@ export const Calendar = () => {
     useCalendarRendaringData();
   let memoryIndex = 0;
 
-  if (!data) return null;
+  if (!data?.data) return null;
 
   const { memories } = data.data;
 

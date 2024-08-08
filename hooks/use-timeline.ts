@@ -1,6 +1,8 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { useAtomValue } from 'jotai';
 
 import { TimeLineResponse } from '@/features/main/time-line';
+import { AuthInfoAtom } from '@/store/auth';
 
 const getTimeLineData = async (cursorRecordAt: unknown) => {
   const queryString = cursorRecordAt
@@ -17,8 +19,9 @@ const getTimeLineData = async (cursorRecordAt: unknown) => {
 };
 
 export const useTimeLineData = () => {
+  const { nickname } = useAtomValue(AuthInfoAtom);
   return useInfiniteQuery<TimeLineResponse>({
-    queryKey: ['timelineData'],
+    queryKey: ['timelineData', nickname],
     queryFn: ({ pageParam = undefined }) => getTimeLineData(pageParam),
     initialPageParam: null,
     getNextPageParam: (lastPage) =>
