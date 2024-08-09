@@ -16,9 +16,20 @@ import { css } from '@/styled-system/css';
 import { useDistancePageModal } from '../../hooks';
 import { isDistancePageModalOpen } from '../../store';
 import { formSubInfoState } from '../../store/form-sub-info';
+import { StrokeProps } from '../../types';
 import { StrokeDistanceFields } from './stroke-distance-fields';
 
-export function DistancePageModal() {
+interface DistancePageModalProps {
+  defaultStrokes?: StrokeProps[];
+  defaultTotalMeter?: number;
+  defaultTotalLap?: number;
+}
+
+export function DistancePageModal({
+  defaultStrokes,
+  defaultTotalMeter,
+  defaultTotalLap,
+}: DistancePageModalProps) {
   const { getValues, setValue } = useFormContext();
   const pageModalState = useAtomValue(isDistancePageModalOpen);
   const setFormSubInfo = useSetAtom(formSubInfoState);
@@ -33,7 +44,12 @@ export function DistancePageModal() {
     strokes,
     buttonLabel,
     handlers,
-  } = useDistancePageModal<HTMLDivElement>(getValues('lane') as number);
+  } = useDistancePageModal<HTMLDivElement>(
+    getValues('lane') as number,
+    defaultStrokes,
+    defaultTotalMeter,
+    defaultTotalLap,
+  );
 
   const isAssistiveIndexZero = assistiveTabIndex === 0;
   const isAssistiveIndexOne = assistiveTabIndex === 1;
@@ -66,6 +82,7 @@ export function DistancePageModal() {
   const handleBackArrowClick = () => {
     handlers.onClosePageModal();
   };
+
   const handleDoneButtonClick = () => {
     if (secondaryTabIndex === 0 && assistiveTabIndex === 0)
       setFormSubInfo((prev) => ({

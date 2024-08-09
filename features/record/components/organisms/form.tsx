@@ -19,8 +19,8 @@ import {
   useMemory,
 } from '../../apis';
 import { RecordRequestProps } from '../../apis/dto';
+import { useEditMemory } from '../../apis/use-edit-memory';
 import { useImageStatus } from '../../apis/use-image-status';
-import { usePullMemory } from '../../apis/use-pull-memory';
 import {
   isDistancePageModalOpen,
   isLaneLengthBottomSheetOpen,
@@ -40,10 +40,12 @@ import { TimeBottomSheet } from './time-bottom-sheet';
 
 //Todo: watch의 성능 이슈 고민
 //Todo: form.tsx 파일 내부 리팩토링
+//Todo: 수정모드일 시, 기록 불러올 때 보여줄 로딩 UI 구현
 export function Form() {
   const searchParams = useSearchParams();
   const date = searchParams.get('date');
-  const { data } = usePullMemory(Number(searchParams.get('memoryId')));
+  const isEditMode = Boolean(searchParams.get('memoryId'));
+  const { data } = useEditMemory(Number(searchParams.get('memoryId')));
   const [formSubInfo, setFormSubInfo] = useAtom(formSubInfoState);
   const methods = useForm<RecordRequestProps>({
     defaultValues: {
@@ -64,7 +66,7 @@ export function Form() {
         startTime: prevData.startTime,
         endTime: prevData.endTime,
         lane: prevData.lane,
-        poolId: prevData?.pool?.id ? prevData.pool.id : undefined,
+        poolId: prevData.pool ? prevData.pool.id : undefined,
         diary: prevData.diary ? prevData.diary : undefined,
         heartRate: prevData.memoryDetail.heartRate
           ? prevData.memoryDetail.heartRate
@@ -78,6 +80,7 @@ export function Form() {
         kcal: prevData.memoryDetail.kcal
           ? prevData.memoryDetail.kcal
           : undefined,
+        strokes: prevData.strokes ? prevData.strokes : undefined,
       });
       setFormSubInfo({
         imageFiles: [],
@@ -228,7 +231,7 @@ export function Form() {
           />
           <div className={buttonStyles.layout}>
             <Button
-              label="기록하기"
+              label={isEditMode ? '수정하기' : '기록하기'}
               size="large"
               className={buttonStyles.content}
               disabled={!isRecordAbled}
@@ -236,18 +239,32 @@ export function Form() {
           </div>
         </div>
         <Divider variant="thick" />
-        <PhotoSection title="오늘의 사진" />
+        <PhotoSection
+          title="오늘의 사진"
+          defaultImage={
+            data && data.data.images.length > 0
+              ? data?.data.images[0].url
+              : undefined
+          }
+        />
         <Divider variant="thick" />
         <DiarySection title="일기" value={diary || ''} />
         <Divider variant="thick" />
-        <EquipmentSection title="장비" />
+        <EquipmentSection
+          title="장비"
+          defaultEquipment={data?.data.memoryDetail.item}
+        />
         <Divider variant="thick" />
         <SubInfoSection title="심박수 · 페이스 · 칼로리" />
         <div className={blockStyles} />
       </form>
       <LaneLengthBottomSheet title="레인 길이를 선택해주세요" />
       <PoolSearchPageModal title="어디서 수영했나요?" />
-      <DistancePageModal />
+      <DistancePageModal
+        defaultStrokes={data?.data.strokes}
+        defaultTotalMeter={data?.data.totalMeter}
+        defaultTotalLap={data?.data.totalLap}
+      />
       <TimeBottomSheet />
     </FormProvider>
   );

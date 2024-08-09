@@ -9,7 +9,13 @@ import { StrokeProps } from '../types';
 
 type tabIndex = 0 | 1;
 
-export function useDistancePageModal<T>(lane: number) {
+//Todo: 상태들 리팩토링 & 각 로직들 리팩토링
+export function useDistancePageModal<T>(
+  lane: number,
+  defaultStrokes?: StrokeProps[],
+  defaultTotalMeter?: number,
+  defaultTotalLap?: number,
+) {
   const pageModalRef = useRef<T>(null);
   const setPageModalState = useSetAtom(isDistancePageModalOpen);
   const [secondaryTabIndex, setSecondaryTabIndex] = useState<tabIndex>(0);
@@ -47,6 +53,28 @@ export function useDistancePageModal<T>(lane: number) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [strokes, lane]);
+
+  useEffect(() => {
+    if (defaultStrokes) {
+      if (defaultStrokes.length === 1 && defaultStrokes[0].name === '총거리') {
+        setTotalMeter(String(defaultTotalMeter));
+      } else if (
+        defaultStrokes.length === 1 &&
+        defaultStrokes[0].name === '총바퀴'
+      ) {
+        setTotalLaps(String(defaultTotalLap));
+      } else {
+        defaultStrokes.forEach((strokes) => {
+          setStrokes((prev) => [
+            ...prev,
+            (prev[strokeOptions.indexOf(strokes.name)] = strokes),
+          ]);
+        });
+      }
+      setTotalDistance(defaultTotalMeter as number);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultStrokes]);
 
   const onClosePageModal = () => {
     setPageModalState({ isOpen: false, jumpDirection: 'backward' });
