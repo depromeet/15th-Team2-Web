@@ -27,6 +27,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     },
   );
 
+  console.log(code);
+  console.log(res);
+
   if (!res.ok) {
     console.error('Error fetching data:', error);
     return NextResponse.json(
