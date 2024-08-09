@@ -14,9 +14,9 @@ async function pullEditMemory(memoryId: number) {
   return res.json();
 }
 
-export function useEditMemory(memoryId: number) {
+export function usePullEditMemory(memoryId: number) {
   return useQuery<MemoryPullResponse>({
-    queryKey: ['usePullMemory', memoryId],
+    queryKey: ['usePullEditMemory', memoryId],
     queryFn: () => pullEditMemory(memoryId),
     retry: 1,
     enabled: !!memoryId,

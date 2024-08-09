@@ -11,16 +11,25 @@ interface RecordSuccessPageProps {
 export default function RecordSuccessPage({
   searchParams,
 }: RecordSuccessPageProps) {
+  const isEditMode = Boolean(searchParams.editMode);
   return (
     <div className={layoutStyles.full}>
       <div className={layoutStyles.content}>
         <SuccessCheckIcon />
-        <h3 className={textStyles.title}>기록 완료!</h3>
-        <p>
-          {searchParams.month}월 달{' '}
-          <span className={textStyles.sub}>{searchParams.rank}번째</span>{' '}
-          기록이에요.
-        </p>
+        <h3 className={textStyles.title}>
+          {isEditMode ? '수정' : '기록'} 완료!
+        </h3>
+        {isEditMode ? (
+          <p className={textStyles.paragraph}>
+            기록 수정이 성공적으로 완료되었어요.
+          </p>
+        ) : (
+          <p className={textStyles.paragraph}>
+            {searchParams.month}월 달{' '}
+            <span className={textStyles.sub}>{searchParams.rank}번째</span>{' '}
+            기록이에요.
+          </p>
+        )}
       </div>
       <Link
         href={`/record-detail/${searchParams.memoryId}`}

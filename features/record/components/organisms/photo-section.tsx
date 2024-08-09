@@ -2,7 +2,6 @@
 
 import { useSetAtom } from 'jotai';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
 
 import { Image } from '@/components/atoms';
 import { css } from '@/styled-system/css';
@@ -24,7 +23,6 @@ interface PhotoSectionProps extends FormSectionProps {
 export function PhotoSection({ title, defaultImage }: PhotoSectionProps) {
   const [image, setImage] = useState<string[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
-  const { setValue } = useFormContext();
 
   const setFormSubInfo = useSetAtom(formSubInfoState);
 
@@ -73,7 +71,7 @@ export function PhotoSection({ title, defaultImage }: PhotoSectionProps) {
   }, [defaultImage]);
 
   const handleImageDeleteClick = () => {
-    setValue('imageFiles', []);
+    setFormSubInfo((prev) => ({ ...prev, imageFiles: [] }));
     setImage([]);
   };
 
