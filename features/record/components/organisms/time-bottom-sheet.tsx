@@ -17,23 +17,25 @@ import {
   addMinutes,
   convertTo24HourFormat,
   convertToPickerValue,
+  subtractMinutes,
 } from '../../utils';
 
 interface TimeBottomSheetProps {
-  startTime?: string;
-  endTime?: string;
+  startTime: string;
+  endTime: string;
 }
 
 export function TimeBottomSheet({ startTime, endTime }: TimeBottomSheetProps) {
   const { getValues, setValue } = useFormContext();
   const [timeBottmSheetState, setTimeBottmSheetState] =
     useAtom(timeBottomSheetState);
-
   const [pickerValue, setPickerValue] = useState<{
     ampm: AmpmType;
     hour: HourType;
     minute: MinuteType;
   }>(defaultPickerValue);
+
+  usePreventBodyScroll({ isOpen: timeBottmSheetState.isOpen });
 
   useEffect(() => {
     if (Boolean(startTime) && timeBottmSheetState.variant === 'start')
@@ -43,15 +45,28 @@ export function TimeBottomSheet({ startTime, endTime }: TimeBottomSheetProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeBottmSheetState.variant]);
 
-  usePreventBodyScroll({ isOpen: timeBottmSheetState.isOpen });
+  const autoSetStartTime = () => {
+    // 시작 시간이 아직 설정 안됨 or 시작 시간이 종료 시간보다 이후일 경우
+    if (
+      !getValues('startTime') ||
+      getValues('startTime') >= getValues('endTime')
+    )
+      setValue('startTime', subtractMinutes(pickerValue, 50));
+  };
+
+  const autoSetEndTime = () => {
+    // 끝 시간이 아직 설정 안됨 or 시작 시간이 종료 시간보다 이후일 경우
+    if (!getValues('endTime') || getValues('startTime') >= getValues('endTime'))
+      setValue('endTime', addMinutes(pickerValue, 50));
+  };
 
   const handleDoneButtonClick = () => {
     if (timeBottmSheetState.variant === 'start') {
       setValue('startTime', convertTo24HourFormat(pickerValue));
-      if (!getValues('endTime'))
-        setValue('endTime', addMinutes(pickerValue, 50));
+      autoSetEndTime();
     } else if (timeBottmSheetState.variant === 'end') {
       setValue('endTime', convertTo24HourFormat(pickerValue));
+      autoSetStartTime();
     }
     setTimeBottmSheetState((prev) => ({ ...prev, isOpen: false }));
   };

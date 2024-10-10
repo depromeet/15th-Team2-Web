@@ -67,6 +67,34 @@ export const addMinutes = (
   return `${newHour}:${newMinute}`;
 };
 
+export const subtractMinutes = (
+  pickerValue: {
+    ampm: AmpmType;
+    hour: HourType;
+    minute: MinuteType;
+  },
+  minutesToSubtract: number,
+) => {
+  let hour24 = parseInt(pickerValue.hour, 10);
+  if (pickerValue.ampm === '오후' && hour24 !== 12) {
+    hour24 += 12;
+  }
+  if (pickerValue.ampm === '오전' && hour24 === 12) {
+    hour24 = 0;
+  }
+
+  const date = new Date();
+  date.setHours(hour24);
+  date.setMinutes(parseInt(pickerValue.minute, 10));
+
+  date.setMinutes(date.getMinutes() - minutesToSubtract);
+
+  const newHour = date.getHours().toString().padStart(2, '0');
+  const newMinute = date.getMinutes().toString().padStart(2, '0');
+
+  return `${newHour}:${newMinute}`;
+};
+
 export const compareTime = (time1: string, time2: string) => {
   const [hour1, minute1] = time1.split(':').map(Number);
   const [hour2, minute2] = time2.split(':').map(Number);
